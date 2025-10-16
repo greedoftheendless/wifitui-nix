@@ -4,7 +4,6 @@
 
 <img width="814.5" height="369" alt="image" src="https://github.com/user-attachments/assets/2a49cc88-4ce0-4532-b7ef-e64d7c3dc888" />
 
-
 ## Features
 
 - [x] **Works with NetworkManager over dbus**
@@ -22,70 +21,37 @@ More things I'd like to do:
 - [ ] More stats about the current network
 - [ ] Maybe a better name?
 
-## Getting Started
+## Getting Started with Nix
 
-Install [the latest release](https://github.com/shazow/wifitui/releases/) on your fav distro (wifitui is [not maintained in package managers yet](https://github.com/shazow/wifitui/issues/48)), here's a handy script for convenience:
+This project is packaged for Nix. You can build and install it using the provided Nix expression.
+
+### Building and Installing
+
+To build and install `wifitui`, you first need to update the `sha256` and `vendorHash` in `nix/default.nix`.
+
+1.  Run `nix-build nix`. This command will fail, but it will output the correct `sha256` hash for the source code.
+2.  Copy the `sha256` hash into the `sha256` field in `nix/default.nix`.
+3.  Run `nix-build nix` again. This time, it will fail with a message about the `vendorHash`.
+4.  Copy the `vendorHash` into the `vendorHash` field in `nix/default.nix`.
+5.  Run `nix-build nix` one more time. This will build the package and create a `result` symlink in the current directory.
+
+To install the package into your Nix profile, run:
 
 ```shell
-# Fetch the latest release version
-TAG=$(curl -s https://api.github.com/repos/shazow/wifitui/releases/latest | grep "tag_name" | cut -d '"' -f4)
-OS="linux_$(uname -m)" # x86_64 or arm64
-LATEST_RELEASE="https://github.com/shazow/wifitui/releases/download/${TAG}/wifitui_${TAG:1}_${OS}"
-
-# Arch Linux
-sudo pacman -U "${LATEST_RELEASE}.pkg.tar.zst"
-
-# Debian
-sudo apt install "${LATEST_RELEASE}.deb"
-
-# Just the binary (any distro)
-wget -q -O- "${LATEST_RELEASE}.tar.gz" | tar xzv
+nix-env -f nix -i
 ```
 
+### Development
 
-If you have nix, you can run the latest code in one command:
+You can use `nix-shell` to create a development environment with all the necessary dependencies.
 
-```
-nix run github:shazow/wifitui
-```
-
-Run the TUI:
-
-```
-$ wifitui
+```shell
+nix-shell nix
 ```
 
-Or run it in non-interactive mode:
+This will drop you into a shell where you can run `go build` to build the project.
 
-```console
-$ ./wifitui --help
-USAGE
-  wifitui [flags] <subcommand> [args...]
-
-SUBCOMMANDS
-  list     List wifi networks
-  show     Show a wifi network
-  connect  Connect to a wifi network
-
-FLAGS
-  -version=false  display version
-
-$ ./wifitui show --json "GET off my LAN"
-{
-  "SSID": "GET off my LAN",
-  "IsActive": false,
-  "IsKnown": false,
-  "IsSecure": false,
-  "IsVisible": false,
-  "IsHidden": false,
-  "Strength": 0,
-  "Security": 3,
-  "LastConnected": null,
-  "AutoConnect": false
-}
-```
-
-##  Why not `nmtui` or `impala`?
+## Why not `nmtui` or `impala`?
 
 Each has features the other lacks: `nmtui` can reveal passphrases but can't trigger a rescan, `impala` can rescan but can't manage saved networks (partly due to being iwd-exclusive), etc. I used both for a while, but I just wanted one tool that does everything, plus sort by recency, fuzzy filtering, QR code for sharing the network, support multiple backends (nm and iwd), and more.
 
